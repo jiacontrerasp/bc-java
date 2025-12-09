@@ -66,25 +66,12 @@ jobs:
           name: snapshot-jars
           path: bc-java/out/*.jar
 
-      - name: Create Release
-        id: create_release
+      - name: Create Release and Upload Assets
         if: github.event_name == 'push' && github.ref == 'refs/heads/main'
-        uses: actions/create-release@v1
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        with:
-          tag_name: v${{ env.version }}
-          release_name: Release v${{ env.version }}
-          draft: false
-          prerelease: false
-
-      - name: Upload JARs to Release
-        if: github.event_name == 'push' && github.ref == 'refs/heads/main'
-        uses: actions/upload-release-asset@v1
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        with:
-          upload_url: ${{ steps.create_release.outputs.upload_url }}
-          asset_path: bc-java/out/*.jar
-          asset_name: bc-java-jars-${{ env.version }}.zip
-          asset_content_type: application/zip
+        run: |
+          gh release create v${{ env.version }} \
+            --title "Release v${{ env.version }}" \
+            --notes "Release v${{ env.version }}" \
+            bc-java/out/*.jar
