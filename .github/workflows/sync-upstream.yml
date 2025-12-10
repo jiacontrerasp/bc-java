@@ -23,7 +23,7 @@ jobs:
           git fetch upstream
           git config --global user.name "GitHub Action"
           git config --global user.email "action@github.com"
-          if ! git merge upstream/master; then
+          if ! git merge upstream/main; then
             echo "Merge conflict detected. Please resolve conflicts manually."
             git merge --abort
             exit 1
