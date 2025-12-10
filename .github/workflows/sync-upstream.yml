@@ -24,6 +24,7 @@ jobs:
           git config --global user.email "action@github.com"
           if ! git merge upstream/master; then
             echo "Merge conflict detected. Please resolve conflicts manually."
+            git merge --abort
             exit 1
           fi
           git push
