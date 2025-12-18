@@ -14,6 +14,7 @@ import org.bouncycastle.tls.NamedGroup;
 import org.bouncycastle.tls.PRFAlgorithm;
 import org.bouncycastle.tls.ProtocolName;
 import org.bouncycastle.tls.ProtocolVersion;
+import org.bouncycastle.tls.PskKeyExchangeMode;
 import org.bouncycastle.tls.SecurityParameters;
 import org.bouncycastle.tls.TlsAuthentication;
 import org.bouncycastle.tls.TlsFatalAlert;
@@ -45,10 +46,10 @@ class MockPSKTls13Client
 //        return null;
 //    }
 
-//    public short[] getPskKeyExchangeModes()
-//    {
-//        return new short[]{ PskKeyExchangeMode.psk_dhe_ke, PskKeyExchangeMode.psk_ke };
-//    }
+    public short[] getPskKeyExchangeModes()
+    {
+        return new short[]{ PskKeyExchangeMode.psk_dhe_ke, PskKeyExchangeMode.psk_ke };
+    }
 
     protected Vector getProtocolNames()
     {
