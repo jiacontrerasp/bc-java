@@ -69,9 +69,8 @@ jobs:
       - name: Create Source Archives
         if: github.event_name == 'push' && github.ref == 'refs/heads/main'
         run: |
-          VERSION=${{ env.version }}
-          git archive --format=zip --output=out/bc-java-$VERSION-src.zip HEAD
-          git archive --format=tar.gz --output=out/bc-java-$VERSION-src.tar.gz HEAD
+          git archive --format=zip --output=out/bc-java-${{ env.version }}-src.zip HEAD
+          git archive --format=tar.gz --output=out/bc-java-${{ env.version }}-src.tar.gz HEAD
         working-directory: bc-java
 
       - name: Create Release and Upload Assets
