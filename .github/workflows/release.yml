@@ -86,9 +86,17 @@ jobs:
           else
             echo "No existing release v${{ env.version }} found; proceeding to create a new release."
           fi
+          COMMIT_SHA=$(git rev-parse --short HEAD)
+          CHANGELOG_ENTRY=$(git log -1 --pretty=format:"%s")
+          cat > RELEASE_NOTES.txt <<EOF
+          Version: ${{ env.version }}
+          Commit: $COMMIT_SHA
+          Summary: $CHANGELOG_ENTRY
+          This release was created automatically by GitHub Actions.
+          EOF
           gh release create v${{ env.version }} \
             --title "Release v${{ env.version }}" \
-            --notes "Release v${{ env.version }}" \
+            --notes-file RELEASE_NOTES.txt \
             out/*.jar \
             out/*-src.zip \
             out/*-src.tar.gz
