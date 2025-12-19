@@ -6144,14 +6144,12 @@ public class TlsUtils
                 throw new TlsFatalAlert(AlertDescription.missing_extension);
             }
 
-            // TODO[tls13] Fetch these from 'server'
-            short[] serverSupportedModes = { PskKeyExchangeMode.psk_ke };
+            short[] serverSupportedModes = server.getPskKeyExchangeModes();
             boolean useServerOrder = false;
 
             short selectedMode = selectPreSharedKeyMode(pskKeyExchangeModes, serverSupportedModes, useServerOrder);
 
-            // TODO[tls13] Add support for psk_ke?
-            if (PskKeyExchangeMode.psk_ke == selectedMode)
+            if (selectedMode >= 0)
             {
                 // TODO[tls13] Prefer to get the exact index from the server?
                 TlsPSKExternal psk = server.getExternalPSK(offeredPsks.getIdentities());
@@ -6201,10 +6199,10 @@ public class TlsUtils
 
                         if (!Arrays.constantTimeAreEqual(calculatedBinder, binder))
                         {
-                            throw new TlsFatalAlert(AlertDescription.decrypt_error, "Invalid PSK binder");                            
+                            throw new TlsFatalAlert(AlertDescription.decrypt_error, "Invalid PSK binder");
                         }
 
-                        return new OfferedPsks.SelectedConfig(index, psk, pskKeyExchangeModes, earlySecret);
+                        return new OfferedPsks.SelectedConfig(index, psk, pskKeyExchangeModes, earlySecret, selectedMode);
                     }
                 }
             }

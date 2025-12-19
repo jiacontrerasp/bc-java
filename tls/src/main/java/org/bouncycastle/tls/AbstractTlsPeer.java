@@ -1,8 +1,11 @@
 package org.bouncycastle.tls;
 
 import java.io.IOException;
+import java.util.StringTokenizer;
+import java.util.Vector;
 
 import org.bouncycastle.tls.crypto.TlsCrypto;
+import org.bouncycastle.util.Arrays;
 
 /**
  * Base class for a TLS client or server.
@@ -84,7 +87,42 @@ public abstract class AbstractTlsPeer
 
     public short[] getPskKeyExchangeModes()
     {
-        return new short[]{ PskKeyExchangeMode.psk_dhe_ke };
+        String propertyValue = null;
+        try
+        {
+            propertyValue = System.getProperty("org.bouncycastle.tls.psk.modes");
+        }
+        catch (SecurityException e)
+        {
+            // Ignore
+        }
+
+        if (null == propertyValue)
+        {
+            return new short[]{ PskKeyExchangeMode.psk_ke, PskKeyExchangeMode.psk_dhe_ke };
+        }
+
+        Vector modes = new Vector();
+        StringTokenizer t = new StringTokenizer(propertyValue, ",");
+        while (t.hasMoreTokens())
+        {
+            String token = t.nextToken().trim();
+            if ("psk_ke".equals(token))
+            {
+                modes.addElement(Short.valueOf(PskKeyExchangeMode.psk_ke));
+            }
+            else if ("psk_dhe_ke".equals(token))
+            {
+                modes.addElement(Short.valueOf(PskKeyExchangeMode.psk_dhe_ke));
+            }
+        }
+
+        short[] result = new short[modes.size()];
+        for (int i = 0; i < result.length; ++i)
+        {
+            result[i] = ((Short)modes.elementAt(i)).shortValue();
+        }
+        return result;
     }
 
     public boolean requiresCloseNotify()
