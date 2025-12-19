@@ -80,7 +80,7 @@ jobs:
         working-directory: bc-java
         run: |
           if gh release view v${{ env.version }} > /dev/null 2>&1; then
-            echo "Existing release v${{ env.version }} found; deleting before creating a new one."
+            echo "Existing release v${{ env.version }} found; deleting it before creating a new one."
             gh release delete v${{ env.version }} --cleanup-tag -y
           else
             echo "No existing release v${{ env.version }} found; proceeding to create a new release."
