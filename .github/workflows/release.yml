@@ -87,12 +87,12 @@ jobs:
           fi
           COMMIT_SHA=$(git rev-parse --short HEAD)
           CHANGELOG_ENTRY=$(git log -1 --pretty=format:"%s")
-          cat > RELEASE_NOTES.txt <<EOF
-          Version: ${{ env.version }}
-          Commit: $COMMIT_SHA
-          Summary: $CHANGELOG_ENTRY
-          This release was created automatically by GitHub Actions.
-          EOF
+          {
+            echo "Version: ${{ env.version }}";
+            echo "Commit: $COMMIT_SHA";
+            echo "Summary: $CHANGELOG_ENTRY";
+            echo "This release was created automatically by GitHub Actions.";
+          } > RELEASE_NOTES.txt
           gh release create v${{ env.version }} \
             --title "Release v${{ env.version }}" \
             --notes-file RELEASE_NOTES.txt \
