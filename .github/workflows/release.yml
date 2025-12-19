@@ -80,7 +80,12 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         working-directory: bc-java
         run: |
-          gh release delete v${{ env.version }} --cleanup-tag -y || true
+          if gh release view v${{ env.version }} > /dev/null 2>&1; then
+            echo "Existing release v${{ env.version }} found; deleting before creating a new one."
+            gh release delete v${{ env.version }} --cleanup-tag -y
+          else
+            echo "No existing release v${{ env.version }} found; proceeding to create a new release."
+          fi
           gh release create v${{ env.version }} \
             --title "Release v${{ env.version }}" \
             --notes "Release v${{ env.version }}" \
