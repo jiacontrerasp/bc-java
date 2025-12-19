@@ -85,8 +85,8 @@ jobs:
           else
             echo "No existing release v${{ env.version }} found; proceeding to create a new release."
           fi
-          COMMIT_SHA=$(git rev-parse --short HEAD)
-          CHANGELOG_ENTRY=$(git log -1 --pretty=format:"%s")
+          COMMIT_SHA="$(git rev-parse --short HEAD)"
+          CHANGELOG_ENTRY="$(git log -1 --pretty=format:%s)"
           {
             echo "Version: ${{ env.version }}";
             echo "Commit: $COMMIT_SHA";
