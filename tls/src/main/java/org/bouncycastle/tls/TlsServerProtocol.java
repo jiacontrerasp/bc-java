@@ -165,13 +165,12 @@ public class TlsServerProtocol
         ProtocolVersion serverVersion = securityParameters.getNegotiatedVersion();
         TlsCrypto crypto = tlsServerContext.getCrypto();
 
-        // NOTE: Will only select for psk_dhe_ke
         OfferedPsks.SelectedConfig selectedPSK = TlsUtils.selectPreSharedKey(tlsServerContext, tlsServer,
             clientHelloExtensions, clientHelloMessage, handshakeHash, afterHelloRetryRequest);
 
         Vector clientShares = TlsExtensionsUtils.getKeyShareClientHello(clientHelloExtensions);
 
-        KeyShareEntry clientShare;
+        KeyShareEntry clientShare = null;
         if (afterHelloRetryRequest)
         {
             if (retryGroup < 0)
@@ -291,27 +290,30 @@ public class TlsServerProtocol
                 TlsUtils.negotiatedCipherSuite(securityParameters, cipherSuite);
             }
 
-//            int[] clientSupportedGroups = securityParameters.getClientSupportedGroups();
-//            int[] serverSupportedGroups = securityParameters.getServerSupportedGroups();
-//            boolean useServerOrder = tlsServer.preferLocalSupportedGroups();
-//
-//            int selectedGroup = TlsUtils.selectKeyShareGroup(crypto, serverVersion, clientSupportedGroups,
-//                serverSupportedGroups, useServerOrder);
-//            if (selectedGroup < 0)
-//            {
-//                throw new TlsFatalAlert(AlertDescription.handshake_failure);
-//            }
-//
-//            clientShare = TlsUtils.findEarlyKeyShare(clientShares, selectedGroup);
-//
-//            if (null == clientShare)
-//            {
-//                this.retryGroup = selectedGroup;
-//
-//                this.retryCookie = tlsServerContext.getNonceGenerator().generateNonce(16);
-//
-//                return generate13HelloRetryRequest(clientHello);
-//            }
+            if (null == selectedPSK || selectedPSK.selectedPskMode == PskKeyExchangeMode.psk_dhe_ke)
+            {
+                int[] clientSupportedGroups = securityParameters.getClientSupportedGroups();
+                int[] serverSupportedGroups = securityParameters.getServerSupportedGroups();
+                boolean useServerOrder = tlsServer.preferLocalSupportedGroups();
+
+                int selectedGroup = TlsUtils.selectKeyShareGroup(crypto, serverVersion, clientSupportedGroups,
+                    serverSupportedGroups, useServerOrder);
+                if (selectedGroup < 0)
+                {
+                    throw new TlsFatalAlert(AlertDescription.handshake_failure);
+                }
+
+                clientShare = TlsUtils.findEarlyKeyShare(clientShares, selectedGroup);
+
+                if (null == clientShare)
+                {
+                    this.retryGroup = selectedGroup;
+
+                    this.retryCookie = tlsServerContext.getNonceGenerator().generateNonce(16);
+
+                    return generate13HelloRetryRequest(clientHello);
+                }
+            }
         }
 
 
@@ -396,28 +398,29 @@ public class TlsServerProtocol
         }
 
         TlsSecret sharedSecret = null;
-//        {
-//            int negotiatedGroup = securityParameters.getNegotiatedGroup();
-//
-//            if (clientShare.getNamedGroup() != negotiatedGroup)
-//            {
-//                throw new TlsFatalAlert(AlertDescription.illegal_parameter);
-//            }
-//
-//            TlsAgreement agreement = TlsUtils.createKeyShare(crypto, negotiatedGroup, true);
-//            if (agreement == null)
-//            {
-//                throw new TlsFatalAlert(AlertDescription.internal_error);
-//            }
-//
-//            agreement.receivePeerValue(clientShare.getKeyExchange());
-//
-//            byte[] key_exchange = agreement.generateEphemeral();
-//            KeyShareEntry serverShare = new KeyShareEntry(negotiatedGroup, key_exchange);
-//            TlsExtensionsUtils.addKeyShareServerHello(serverHelloExtensions, serverShare);
-//
-//            sharedSecret = agreement.calculateSecret();
-//        }
+        if (null == selectedPSK || selectedPSK.selectedPskMode == PskKeyExchangeMode.psk_dhe_ke)
+        {
+            int negotiatedGroup = securityParameters.getNegotiatedGroup();
+
+            if (clientShare.getNamedGroup() != negotiatedGroup)
+            {
+                throw new TlsFatalAlert(AlertDescription.illegal_parameter);
+            }
+
+            TlsAgreement agreement = TlsUtils.createKeyShare(crypto, negotiatedGroup, true);
+            if (agreement == null)
+            {
+                throw new TlsFatalAlert(AlertDescription.internal_error);
+            }
+
+            agreement.receivePeerValue(clientShare.getKeyExchange());
+
+            byte[] key_exchange = agreement.generateEphemeral();
+            KeyShareEntry serverShare = new KeyShareEntry(negotiatedGroup, key_exchange);
+            TlsExtensionsUtils.addKeyShareServerHello(serverHelloExtensions, serverShare);
+
+            sharedSecret = agreement.calculateSecret();
+        }
 
         TlsUtils.establish13PhaseSecrets(tlsServerContext, pskEarlySecret, sharedSecret);
 

@@ -36,13 +36,15 @@ public class OfferedPsks
         final TlsPSK psk;
         final short[] pskKeyExchangeModes;
         final TlsSecret earlySecret;
+        final short selectedPskMode;
 
-        SelectedConfig(int index, TlsPSK psk, short[] pskKeyExchangeModes, TlsSecret earlySecret)
+        SelectedConfig(int index, TlsPSK psk, short[] pskKeyExchangeModes, TlsSecret earlySecret, short selectedPskMode)
         {
             this.index = index;
             this.psk = psk;
             this.pskKeyExchangeModes = pskKeyExchangeModes;
             this.earlySecret = earlySecret;
+            this.selectedPskMode = selectedPskMode;
         }
     }
 

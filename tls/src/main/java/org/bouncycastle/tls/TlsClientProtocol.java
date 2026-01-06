@@ -906,7 +906,8 @@ public class TlsClientProtocol
 
         if (null != clientBinders)
         {
-            if (!Arrays.contains(clientBinders.pskKeyExchangeModes, PskKeyExchangeMode.psk_dhe_ke))
+            if (!Arrays.contains(clientBinders.pskKeyExchangeModes, PskKeyExchangeMode.psk_dhe_ke) &&
+                !Arrays.contains(clientBinders.pskKeyExchangeModes, PskKeyExchangeMode.psk_ke))
             {
                 this.clientBinders = null;
 
